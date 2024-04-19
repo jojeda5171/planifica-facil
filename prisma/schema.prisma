@@ -13,62 +13,97 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Datos de la empresa
 model Empresa {
-  id                  Int                   @id @default(autoincrement())
-  nombre              String
-  logo                String
-  direccion           String
-  telefono            String
-  email               String
-  web                 String
-  Usuario             Usuario[]
-  Categoria_Calculo   Categoria_Calculo[]
-  Categoria_Credito   Categoria_Credito[]
-  Tipo_Persona        Tipo_Persona[]
-  Categoria_Inversion Categoria_Inversion[]
+  id                        Int                         @id @default(autoincrement())
+  nombre                    String
+  ruc                       String                      @unique
+  logo                      String?
+  direccion                 String?
+  telefono                  String?
+  email                     String                      @unique
+  web                       String?
+  Empresa_Rol               Empresa_Rol[]
+  Empresa_Categoria_Calculo Empresa_Categoria_Calculo[]
+  Categoria_Credito         Categoria_Credito[]
+  Empresa_Tipo_Persona      Empresa_Tipo_Persona[]
+  Categoria_Inversion       Categoria_Inversion[]
 }
 
-model Rol {
-  id      Int       @id @default(autoincrement())
-  nombre  String
-  Usuario Usuario[]
-}
-
-model Usuario {
+// Una empresa puede tener muchos roles y un rol pertenece a muchas empresas
+model Empresa_Rol {
   id        Int     @id @default(autoincrement())
-  nombre    String
-  apellido  String
-  email     String
-  password  String
-  telefono  String
   empresaId Int
   rolId     Int
   Empresa   Empresa @relation(fields: [empresaId], references: [id])
   Rol       Rol     @relation(fields: [rolId], references: [id])
 }
 
+// Roles de usuario: Un rol puede tener mas de un usuario
+model Rol {
+  id          Int           @id @default(autoincrement())
+  nombre      String        @unique
+  Empresa_Rol Empresa_Rol[]
+  Usuario     Usuario[]
+}
+
+// Datos del usuario
+model Usuario {
+  id       Int    @id @default(autoincrement())
+  nombre   String
+  apellido String
+  email    String @unique
+  password String
+  telefono String
+  rolId    Int
+  Rol      Rol    @relation(fields: [rolId], references: [id])
+}
+
+// Una empresa puede tener varias formas de calculo (Frances y/o Aleman)
+// Un tipo de calculo (Frances y/o Aleman) puede perteneces a mas de 1 Empresa
+model Empresa_Categoria_Calculo {
+  id                Int               @id @default(autoincrement())
+  empresaId         Int
+  categoriaId       Int
+  Empresa           Empresa           @relation(fields: [empresaId], references: [id])
+  Categoria_Calculo Categoria_Calculo @relation(fields: [categoriaId], references: [id])
+}
+
+// Tipos de calculos (Frances, Aleman)
 model Categoria_Calculo {
-  id        Int     @id @default(autoincrement())
-  nombre    String
-  EmpresaId Int
-  Empresa   Empresa @relation(fields: [EmpresaId], references: [id])
+  id                        Int                         @id @default(autoincrement())
+  nombre                    String                      @unique
+  Empresa_Categoria_Calculo Empresa_Categoria_Calculo[]
 }
 
+// Tipos de creditos: Consumo, vivienda, etc.
+// Cada Empresa maneja su categoria de creditos
 model Categoria_Credito {
-  id           Int     @id @default(autoincrement())
-  nombre       String
+  id           Int      @id @default(autoincrement())
+  nombre       String   @unique
   tasa_interes Int
-  EmpresaId    Int
-  Empresa      Empresa @relation(fields: [EmpresaId], references: [id])
+  empresaId    Int
+  Empresa      Empresa @relation(fields: [empresaId], references: [id])
 }
 
+// Una empresa puede tener muchos tipos de persona (Natural y/o Juridica)
+// Cada tipo de persona puede estar asiciado a mas de una empresa
+model Empresa_Tipo_Persona {
+  id            Int          @id @default(autoincrement())
+  empresaId     Int
+  tipoPersonaId Int
+  Empresa       Empresa      @relation(fields: [empresaId], references: [id])
+  Tipo_Persona  Tipo_Persona @relation(fields: [tipoPersonaId], references: [id])
+}
+
+// Tipo de persona: Natural, Jurudica
 model Tipo_Persona {
-  id        Int     @id @default(autoincrement())
-  nombre    String
-  EmpresaId Int
-  Empresa   Empresa @relation(fields: [EmpresaId], references: [id])
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @unique
+  Empresa_Tipo_Persona Empresa_Tipo_Persona[]
 }
 
+// Una empresa maneja sus tipos de inversiones.
 model Categoria_Inversion {
   id           Int     @id @default(autoincrement())
   nombre       String
