@@ -11,8 +11,6 @@ function Login() {
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log(data.get("email"))
-        console.log(data.get('password'))
         const respuesta = await signIn('credentials', {
             email: data.get('email'),
             password: data.get('password'),
