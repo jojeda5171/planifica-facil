@@ -52,6 +52,7 @@ model Usuario {
   id       Int    @id @default(autoincrement())
   nombre   String
   apellido String
+  cedula   String @unique
   email    String @unique
   password String
   telefono String
@@ -79,8 +80,8 @@ model Categoria_Calculo {
 // Tipos de creditos: Consumo, vivienda, etc.
 // Cada Empresa maneja su categoria de creditos
 model Categoria_Credito {
-  id           Int      @id @default(autoincrement())
-  nombre       String   @unique
+  id           Int     @id @default(autoincrement())
+  nombre       String  @unique
   tasa_interes Int
   empresaId    Int
   Empresa      Empresa @relation(fields: [empresaId], references: [id])
