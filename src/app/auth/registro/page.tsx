@@ -3,13 +3,12 @@ import Link from "next/link";
 
 function Registro() {
     return (
-        <section id="registro" className="font-sans  min-h-screen bg-gray-900">
-            <div className="container mx-auto flex justify-center items-center h-full w-full">
-                <div className="w-full max-w-lg">
+        <section id="registro" className="font-sans bg-gray-900 min-h-screen flex justify-center items-center">
+            <div className="container">
+                <div className="w-full max-h-lg">
                     <div className="leading-loose">
                         <form className="max-w-2xl m-auto p-10 bg-black bg-opacity-35 rounded shadow-xl overflow-hidden">
                             <p className="text-white  text-center text-lg font-bold">Registro</p>
-                            {/* <div className="grid grid-cols-2 gap-4"> */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="mt-2">
                                     <label className="block text-sm text-white" htmlFor="firstName">Nombre</label>
