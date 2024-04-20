@@ -3,6 +3,7 @@ CREATE TABLE `Empresa` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `nombre` VARCHAR(191) NOT NULL,
     `ruc` VARCHAR(191) NOT NULL,
+    `clave_acceso` VARCHAR(191) NOT NULL,
     `logo` VARCHAR(191) NULL,
     `direccion` VARCHAR(191) NULL,
     `telefono` VARCHAR(191) NULL,
@@ -10,6 +11,7 @@ CREATE TABLE `Empresa` (
     `web` VARCHAR(191) NULL,
 
     UNIQUE INDEX `Empresa_ruc_key`(`ruc`),
+    UNIQUE INDEX `Empresa_clave_acceso_key`(`clave_acceso`),
     UNIQUE INDEX `Empresa_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

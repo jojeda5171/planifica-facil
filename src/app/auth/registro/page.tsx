@@ -8,8 +8,12 @@ function Registro() {
                 <div className="w-full max-h-lg">
                     <div className="leading-loose">
                         <form className="max-w-2xl m-auto p-10 bg-black bg-opacity-35 rounded shadow-xl overflow-hidden">
-                            <p className="text-white  text-center text-lg font-bold">Registro</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <p className="text-white  text-center text-lg font-bold">REGISTRO</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="mt-2 col-span-2">
+                                    <label className="block text-sm text-white" htmlFor="firstName">Clave de acceso a la empresa</label>
+                                    <input name='clave_acceso' className="w-full px-5 py-1 text-gray-700 bg-gray-300 rounded focus:outline-none focus:bg-white" type="text" id="clave_acceso" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxx" aria-label="nombre" required />
+                                </div>
                                 <div className="mt-2">
                                     <label className="block text-sm text-white" htmlFor="firstName">Nombre</label>
                                     <input name='nombre' className="w-full px-5 py-1 text-gray-700 bg-gray-300 rounded focus:outline-none focus:bg-white" type="text" id="nombre" placeholder="Nombre" aria-label="nombre" required />
@@ -60,10 +64,6 @@ function Registro() {
                 </div>
             </div>
         </section>
-
-
-
-
     )
 }
 

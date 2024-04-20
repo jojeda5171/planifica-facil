@@ -14,10 +14,12 @@ datasource db {
 }
 
 // Datos de la empresa
+// Campo Clave_acceso: Es un campo que se genera automaticamente al momento de crear una empresa
 model Empresa {
   id                        Int                         @id @default(autoincrement())
   nombre                    String
   ruc                       String                      @unique
+  clave_acceso              String                      @unique @default(cuid())
   logo                      String?
   direccion                 String?
   telefono                  String?
