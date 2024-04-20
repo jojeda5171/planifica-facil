@@ -69,11 +69,12 @@ function Registro() {
     };
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         // si no hay nada en empresa, no se puede registrar
-        if (empresa.length === 0) {
-            setError('Clave de acceso inválida');
+        if (data.get('password') !== data.get('confirmPassword')) {
+            setError('Contraseñas no coinciden');
         } else {
             const respuesta = await registrarUsuario(data, empresa.id);
             if (respuesta?.error) {
