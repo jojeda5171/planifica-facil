@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { EditIcon } from "../credito/EditIcon";
-import { DeleteIcon } from "../credito/DeleteIcon";
+import { EditIcon } from "./EditIcon";
+import { DeleteIcon } from "./DeleteIcon";
 
 export interface Departamento {
   id_depa: string;
@@ -179,7 +179,7 @@ function DepartamentosPage() {
     <>
       <div className="text-center font-bold my-4 mb-8">
         <h2 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl ">
-          Gestión de Empresas
+          Crear creditos
         </h2>
       </div>
       <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -190,43 +190,13 @@ function DepartamentosPage() {
                 scope="col"
                 className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
               >
-                Nombre de la empresa
+                Tipo de credito
               </th>
               <th
                 scope="col"
                 className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
               >
-                Ruc
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Dirección
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Teléfono
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Email
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Logo
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Web
+                % tasa de interes
               </th>
               <th
                 scope="col"
@@ -332,7 +302,7 @@ function DepartamentosPage() {
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="nombre_depa"
                 >
-                  Nombre del departamento:
+                  Nombre tipo de interes:
                 </label>
 
                 <input
@@ -351,76 +321,21 @@ function DepartamentosPage() {
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="hora_inicio"
                 >
-                  Hora de inicio de jornada:
+                  % tasa de interés:
                 </label>
                 <div className="relative">
                   <input
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     id="hora_inicio"
-                    type="time"
+                    type="number"
+                    placeholder="Ingrese el % de interés"
                     value={formData.hora_inicio}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
               </div>
-              {/* Hora de fin */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_fin"
-                >
-                  Hora de fin de jornada:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_fin"
-                    type="time"
-                    value={formData.hora_fin}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de inicio Receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_ini_desc"
-                >
-                  Hora de inicio de receso:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_ini_desc"
-                    type="time"
-                    value={formData.hora_ini_desc}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de fin de receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_fin_desc"
-                >
-                  Hora de fin de receso:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_fin_desc"
-                    type="time"
-                    value={formData.hora_fin_desc}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
+              
               {/* Buttons */}
               <div className="flex items-center justify-between">
                 <button
