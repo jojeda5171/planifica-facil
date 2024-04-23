@@ -31,14 +31,21 @@ export async function PUT(request, { params }) {
     );
   }
 
-  const updated_tipo_calculo = await prisma.categoriaCalculo.update({
-    where: {
-      id: parseInt(params.id),
-    },
-    data: {
-      ...body,
-    },
-  });
+  try {
+    const updated_tipo_calculo = await prisma.categoriaCalculo.update({
+      where: {
+        id: parseInt(params.id),
+      },
+      data: {
+        ...body,
+      },
+    });
 
-  return NextResponse.json(updated_tipo_calculo);
+    return NextResponse.json(updated_tipo_calculo);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Error al actualizar el tipo de calculo" },
+      { status: 500 }
+    );
+  }
 }
