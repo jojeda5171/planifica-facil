@@ -24,6 +24,8 @@ function Login() {
                     cache: 'no-store'
                 });
             const usuarioJSON = await usuario.json()
+            console.log(usuarioJSON);
+            
             router.push('/dashboard');
         }
     }

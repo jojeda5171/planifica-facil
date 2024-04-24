@@ -4,12 +4,9 @@ import { EditIcon } from "./EditIcon";
 import { DeleteIcon } from "./DeleteIcon";
 
 export interface Departamento {
-  id_depa: string;
-  nombre_depa: string;
-  hora_inicio: string;
-  hora_fin: string;
-  hora_ini_desc: string;
-  hora_fin_desc: string;
+  id: string;
+  nombre: string;
+  tasaInteres: string;
 }
 function DepartamentosPage() {
   const [departamentos, setDepartamentos] = useState([]);
@@ -27,16 +24,13 @@ function DepartamentosPage() {
     indexOfLastItem
   );
   const [formData, setFormData] = useState({
-    id_depa: "0",
-    nombre_depa: "",
-    hora_inicio: "",
-    hora_fin: "",
-    hora_ini_desc: "",
-    hora_fin_desc: "",
+    id: "0",
+    nombre: "",
+    tasaInteres: "",
   });
   const fetchDepartamentos = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/departamentos`);
+      const response = await fetch(`http://localhost:3000/api/categoria-creditos`);
       if (response.ok) {
         const data = await response.json();
         setDepartamentos(data);
@@ -209,16 +203,13 @@ function DepartamentosPage() {
           <tbody>
             {currentItems.map((departamento: Departamento) => (
               <tr
-                key={departamento.id_depa}
+                key={departamento.id}
                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                  {departamento.nombre_depa}
+                  {departamento.nombre}
                 </td>
-                <td className="px-6 py-4">{departamento.hora_inicio}</td>
-                <td className="px-6 py-4">{departamento.hora_fin}</td>
-                <td className="px-6 py-4">{departamento.hora_ini_desc}</td>
-                <td className="px-6 py-4">{departamento.hora_fin_desc}</td>
+                <td className="px-6 py-4">{departamento.tasaInteres}</td>
 
                 <td className="flex items-center px-6 py-4">
                   <a
