@@ -83,7 +83,7 @@ model CategoriaCalculo {
 // Cada Empresa maneja su categoria de creditos
 model CategoriaCredito {
   id          Int     @id @default(autoincrement())
-  nombre      String  @unique
+  nombre      String  
   tasaInteres Int
   empresaId   Int
   Empresa     Empresa @relation(fields: [empresaId], references: [id])
@@ -111,6 +111,6 @@ model CategoriaInversion {
   id          Int     @id @default(autoincrement())
   nombre      String
   tasaInteres Int
-  EmpresaId   Int
-  Empresa     Empresa @relation(fields: [EmpresaId], references: [id])
+  empresaId   Int
+  Empresa     Empresa @relation(fields: [empresaId], references: [id])
 }
