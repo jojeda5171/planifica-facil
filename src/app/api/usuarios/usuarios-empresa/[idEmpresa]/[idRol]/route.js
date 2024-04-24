@@ -29,6 +29,22 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   const datos = await request.json();
+  const empresa = await prisma.empresa.findUnique({
+    where: {
+      id: parseInt(params.idEmpresa),
+    },
+  });
+  if (!empresa) {
+    return NextResponse.json({ error: "Empresa no existe!" }, { status: 404 });
+  }
+  const rol = await prisma.rol.findUnique({
+    where: {
+      id: parseInt(params.idRol),
+    },
+  });
+  if (!rol) {
+    return NextResponse.json({ error: "Rol no existe!" }, { status: 404 });
+  }
   try {
     const hashedPassword = await bcrypt.hash(datos.password, 10);
     datos.password = hashedPassword;
@@ -67,6 +83,6 @@ export async function POST(request, { params }) {
     const { password: _, ...user } = usuario;
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Usuario ya existe!' }, { status: 400 });
+    return NextResponse.json({ error: "Usuario ya existe!" }, { status: 400 });
   }
 }
