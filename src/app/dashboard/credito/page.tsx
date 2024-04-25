@@ -16,6 +16,7 @@ function DepartamentosPage() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const [showFormulario, setShowFormulario] = useState(false);
+  const [userEmpresa, setUserEmpresa] = useState<string | null>(null);
   const [selectedDepartamento, setSelectedDepartamento] =
     useState<Departamento | null>(null);
 
@@ -28,9 +29,13 @@ function DepartamentosPage() {
     nombre: "",
     tasaInteres: "",
   });
-  const fetchDepartamentos = async () => {
+  const fetchDepartamentos = async (userEmpresaData: any) => {
+    console.log(userEmpresaData);
+
     try {
-      const response = await fetch(`http://localhost:3000/api/categoria-creditos`);
+      const response = await fetch(
+        `http://localhost:3000/api/categoria-creditos/empresa/${userEmpresaData}`
+      );
       if (response.ok) {
         const data = await response.json();
         setDepartamentos(data);
@@ -57,51 +62,53 @@ function DepartamentosPage() {
   };
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    
+    const data = {
+      nombre: formData.nombre,
+      tasaInteres: Number(formData.tasaInteres) 
+    };
+    
+    console.log(data);
     try {
-      let url = "http://localhost:5000/departamentos";
+      let url = `http://localhost:3000/api/categoria-creditos/${userEmpresa}`;
       let method = "POST";
       const response = await fetch(url, {
         method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...formData,
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         throw new Error("Failed to register la peticion");
       }
-      fetchDepartamentos();
+      fetchDepartamentos(userEmpresa);
       setFormData({
-        id_depa: "0",
-        nombre_depa: "",
-        hora_inicio: "",
-        hora_fin: "",
-        hora_ini_desc: "",
-        hora_fin_desc: "",
+        id: "0",
+        nombre: "",
+        tasaInteres: "",
       });
-      mostrarMensajeToast("Departamento registrado con éxito!");
+      mostrarMensajeToast("Categoria registrada con éxito!");
       setSelectedDepartamento(null); // Limpiar selectedPeticion después de la operación
       setShowFormulario(false);
     } catch (error) {
       console.error("Error al registrar el departamento:", error);
-      mostrarMensajeToast("Error al registrar el departamento!");
+      mostrarMensajeToast("Error al registrar la categoria!");
     }
   };
   const handleDelete = (id: any) => {
-    fetch(`http://localhost:5000/departamentos/${id}`, {
+    fetch(`http://localhost:3000/api/categoria-creditos/${id}`, {
       method: "DELETE",
     })
       .then((response) => {
         if (response.ok) {
           setDepartamentos((prevDepartamento) =>
             prevDepartamento.filter(
-              (Departamento: Departamento) => Departamento.id_depa !== id
+              (Departamento: Departamento) => Departamento.id !== id
             )
           );
-          mostrarMensajeToast("Departamento eliminado correctamente");
+          mostrarMensajeToast("Categoria eliminada correctamente");
         } else {
           throw new Error("Failed to delete");
         }
@@ -117,20 +124,28 @@ function DepartamentosPage() {
   };
   const handleUpdate = async (e: any, departamentoId: any) => {
     e.preventDefault();
+    console.log(selectedDepartamento);
+
+    const data = {
+      nombre: selectedDepartamento!.nombre,
+      tasaInteres: Number(selectedDepartamento!.tasaInteres) 
+    };
+
+    console.log(data);
+    
+    
     try {
       const response = await fetch(
-        `http://localhost:5000/departamentos/${departamentoId}`,
+        `http://localhost:3000/api/categoria-creditos/${departamentoId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...selectedDepartamento,
-          }),
+          body:JSON.stringify(data),
         }
       );
-      fetchDepartamentos();
+      fetchDepartamentos(userEmpresa);
       // Cerrar el formulario después de la actualización exitosa
       setShowFormulario(false);
       mostrarMensajeToast("Departamento actualizado con éxito!");
@@ -165,8 +180,14 @@ function DepartamentosPage() {
     }
   };
 
+  
+
   useEffect(() => {
-    fetchDepartamentos();
+    const userEmpresadata = localStorage.getItem("userEmpresa");
+
+    setUserEmpresa(userEmpresadata);
+
+    fetchDepartamentos(userEmpresadata);
   }, []);
 
   return (
@@ -222,7 +243,7 @@ function DepartamentosPage() {
                   <a
                     href="#"
                     className="font-medium text-red-600 dark:text-red-500 hover:underline ms-3"
-                    onClick={() => handleDelete(departamento.id_depa)}
+                    onClick={() => handleDelete(departamento.id)}
                   >
                     <DeleteIcon />
                   </a>
@@ -291,16 +312,16 @@ function DepartamentosPage() {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="nombre_depa"
+                  htmlFor="nombre"
                 >
                   Nombre tipo de interes:
                 </label>
 
                 <input
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="nombre_depa"
+                  id="nombre"
                   type="text"
-                  value={formData.nombre_depa}
+                  value={formData.nombre}
                   onChange={handleInputChange}
                   placeholder="Ingrese el nombre del departamento"
                   required
@@ -310,23 +331,23 @@ function DepartamentosPage() {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_inicio"
+                  htmlFor="tasaInteres"
                 >
                   % tasa de interés:
                 </label>
                 <div className="relative">
                   <input
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_inicio"
+                    id="tasaInteres"
                     type="number"
                     placeholder="Ingrese el % de interés"
-                    value={formData.hora_inicio}
+                    value={formData.tasaInteres}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
               </div>
-              
+
               {/* Buttons */}
               <div className="flex items-center justify-between">
                 <button
@@ -351,22 +372,22 @@ function DepartamentosPage() {
           <div className="flex justify-center items-center h-screen">
             <form
               className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-[350px]"
-              onSubmit={(e) => handleUpdate(e, selectedDepartamento.id_depa)}
+              onSubmit={(e) => handleUpdate(e, selectedDepartamento.id)}
             >
               {/* Nombre del departamento */}
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="nombre_depa"
+                  htmlFor="nombre"
                 >
-                  Nombre del departamento:
+                  Nombre tipo de interes:
                 </label>
 
                 <input
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="nombre_depa"
+                  id="nombre"
                   type="text"
-                  value={selectedDepartamento.nombre_depa}
+                  value={selectedDepartamento.nombre}
                   onChange={handleInputChange}
                   placeholder="Ingrese el nombre del departamento"
                   required
@@ -376,78 +397,22 @@ function DepartamentosPage() {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_inicio"
+                  htmlFor="tasaInteres"
                 >
-                  Hora de inicio de jornada:
+                  % tasa de interés:
                 </label>
                 <div className="relative">
                   <input
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_inicio"
-                    type="time"
-                    value={selectedDepartamento.hora_inicio}
+                    id="tasaInteres"
+                    type="number"
+                    value={selectedDepartamento.tasaInteres}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
               </div>
-              {/* Hora de fin */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_fin"
-                >
-                  Hora de fin de jornada:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_fin"
-                    type="time"
-                    value={selectedDepartamento.hora_fin}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de inicio Receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_ini_desc"
-                >
-                  Hora de inicio de receso:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_ini_desc"
-                    type="time"
-                    value={selectedDepartamento.hora_ini_desc}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de fin de receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="hora_fin_desc"
-                >
-                  Hora de fin de receso:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="hora_fin_desc"
-                    type="time"
-                    value={selectedDepartamento.hora_fin_desc}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
+              
 
               <div className="flex items-center justify-between">
                 <button
