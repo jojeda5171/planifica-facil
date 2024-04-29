@@ -11,6 +11,8 @@
   "dependencies": {
     "@prisma/client": "^5.12.1",
     "bcrypt": "^5.1.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "multer": "^1.4.5-lts.1",
     "next": "14.2.2",
     "next-auth": "^4.24.7",

@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface Rol {
   id: string;
@@ -28,6 +30,7 @@ export interface Cuota {
 
 const simuCreditoPage = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
+  const pdfRef = useRef<HTMLDivElement>(null);
   const [amortizacionTipo, setAmortizacionTipo] = useState("");
   const [monto, setMonto] = useState("");
   const [tasaInteres, setTasaInteres] = useState("");
@@ -218,6 +221,87 @@ const simuCreditoPage = () => {
       setMostrarToast(false);
     }, 5000);
   };
+
+  /* const downloadPdf = () => {
+  if (formData===null) {
+    mostrarMensajeToast("Ingrese datos primero")
+    return;
+  }
+
+    const input = pdfRef.current;
+    if (input) {
+      html2canvas(input).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4", true);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = 5;
+        pdf.addImage(
+          imgData,
+          "PNG",
+          imgX,
+          imgY,
+          imgWidth * ratio,
+          imgHeight * ratio
+        );
+        pdf.save("reporteTotal.pdf");
+      });
+    } else {
+      console.error(
+        "El elemento referenciado por pdfRef.current es undefined."
+      );
+    }
+  }; */
+
+  const downloadPdf = () => {
+    // Verificar si alguno de los campos en formData está vacío o no definido
+    if (
+      !formData.monto ||
+      formData.monto.trim() === "" ||
+      formData.interes === null ||
+      formData.tiempo === null ||
+      !formData.fecha_inicio ||
+      formData.fecha_inicio.trim() === "" ||
+      !formData.seguro ||
+      formData.seguro.trim() === ""
+    ) {
+      mostrarMensajeToast("Ingrese todos los datos antes de generar el PDF");
+      return;
+    }
+  
+    const input = pdfRef.current;
+    if (input) {
+      html2canvas(input).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4", true);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = 5;
+        pdf.addImage(
+          imgData,
+          "PNG",
+          imgX,
+          imgY,
+          imgWidth * ratio,
+          imgHeight * ratio
+        );
+        pdf.save("reporteTotal.pdf");
+      });
+    } else {
+      console.error(
+        "El elemento referenciado por pdfRef.current es undefined."
+      );
+    }
+  };
+  
 
   const handleRolChange = (event: any) => {
     const selectedRolId = parseInt(event.target.value, 10);
@@ -438,6 +522,15 @@ const simuCreditoPage = () => {
           >
             Calcular
           </button>
+          <div className="pt-6">
+            <button
+              type="button"
+              className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none font-medium rounded-xl text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600"
+              onClick={downloadPdf}
+            >
+              Descargar
+            </button>
+          </div>
         </form>
 
         <div
@@ -473,7 +566,16 @@ const simuCreditoPage = () => {
           <div data-popper-arrow></div>
         </div>
       </div>
+                
 
+      <div ref={pdfRef} className="mb-10">
+
+      <div className="text-center font-bold my-4 mb-8">
+      <h3 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl ">
+          Tabla de Amortización 
+        </h3>
+      </div>
+      
       <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -542,6 +644,8 @@ const simuCreditoPage = () => {
           </tbody>
         </table>
       </div>
+      </div>
+      
 
       {mostrarToast && (
         <div
