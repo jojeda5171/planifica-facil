@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { EditIcon } from "./EditIcon";
-import { DeleteIcon } from "./DeleteIcon";
+import { EditIcon } from "../credito/EditIcon";
+import { DeleteIcon } from "../credito/DeleteIcon";
 
 export interface Departamento {
   id: string;
   nombre: string;
   tasaInteres: string;
 }
-function DepartamentosPage() {
+function InversionPage() {
   const [departamentos, setDepartamentos] = useState([]);
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,8 +34,11 @@ function DepartamentosPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/categoria-creditos/empresa/${userEmpresaData}`
+        `http://localhost:3000/api/categoria-inversion/empresa/${userEmpresaData}`
       );
+      /* const response = await fetch(
+        `http://localhost:3000/api/categoria-inversion/`
+      ); */
       if (response.ok) {
         const data = await response.json();
         setDepartamentos(data);
@@ -63,42 +66,48 @@ function DepartamentosPage() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     
-    const data = {
-      nombre: formData.nombre,
-      tasaInteres: Number(formData.tasaInteres) 
-    };
-    
-    console.log(data);
-    try {
-      let url = `http://localhost:3000/api/categoria-creditos/${userEmpresa}`;
-      let method = "POST";
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to register la peticion");
-      }
-      fetchDepartamentos(userEmpresa);
-      setFormData({
-        id: "0",
-        nombre: "",
-        tasaInteres: "",
-      });
-      mostrarMensajeToast("Categoria registrada con éxito!");
-      setSelectedDepartamento(null); // Limpiar selectedPeticion después de la operación
-      setShowFormulario(false);
-    } catch (error) {
-      console.error("Error al registrar el departamento:", error);
-      mostrarMensajeToast("Error al registrar la categoria!");
+    if (departamentos !== null && departamentos.length > 0) {
+        mostrarMensajeToast("Solo puede haber una tasa por Empresa");
+    }else {
+        const data = {
+            nombre: formData.nombre,
+            tasaInteres: Number(formData.tasaInteres) 
+          };
+          
+          console.log(data);
+          try {
+            let url = `http://localhost:3000/api/categoria-inversion/${userEmpresa}`;
+            let method = "POST";
+            const response = await fetch(url, {
+              method: method,
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+      
+            if (!response.ok) {
+              throw new Error("Failed to register la peticion");
+            }
+            fetchDepartamentos(userEmpresa);
+            setFormData({
+              id: "0",
+              nombre: "",
+              tasaInteres: "",
+            });
+            mostrarMensajeToast("Tasa registrada con éxito!");
+            setSelectedDepartamento(null); // Limpiar selectedPeticion después de la operación
+            setShowFormulario(false);
+          } catch (error) {
+            console.error("Error al registrar el departamento:", error);
+            mostrarMensajeToast("Error al registrar la categoria!");
+          }
     }
+
+    
   };
   const handleDelete = (id: any) => {
-    fetch(`http://localhost:3000/api/categoria-creditos/${id}`, {
+    fetch(`http://localhost:3000/api/categoria-inversion/${id}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -108,7 +117,7 @@ function DepartamentosPage() {
               (Departamento: Departamento) => Departamento.id !== id
             )
           );
-          mostrarMensajeToast("Categoria eliminada correctamente");
+          mostrarMensajeToast("Tasa eliminada correctamente");
         } else {
           throw new Error("Failed to delete");
         }
@@ -136,7 +145,7 @@ function DepartamentosPage() {
     
     try {
       const response = await fetch(
-        `http://localhost:3000/api/categoria-creditos/${departamentoId}`,
+        `http://localhost:3000/api/categoria-inversion/${departamentoId}`,
         {
           method: "PUT",
           headers: {
@@ -148,7 +157,7 @@ function DepartamentosPage() {
       fetchDepartamentos(userEmpresa);
       // Cerrar el formulario después de la actualización exitosa
       setShowFormulario(false);
-      mostrarMensajeToast("Tasa actualizado con éxito!");
+      mostrarMensajeToast("Tasa actualizada con éxito!");
     } catch (error) {
       console.error("Error al actualizar el departamento:", error);
       mostrarMensajeToast("Error al actualizar");
@@ -194,7 +203,7 @@ function DepartamentosPage() {
     <>
       <div className="text-center font-bold my-4 mb-8">
         <h2 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl ">
-          Crear creditos
+          Crear Tasa Inversión
         </h2>
       </div>
       <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -482,4 +491,4 @@ function DepartamentosPage() {
   );
 }
 
-export default DepartamentosPage;
+export default InversionPage;

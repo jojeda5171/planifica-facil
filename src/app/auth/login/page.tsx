@@ -26,7 +26,7 @@ function Login() {
         }
       );
       const usuarioJSON = await usuario.json();
-      console.log(usuarioJSON.id);
+      console.log(usuarioJSON);
       const response = await fetch(
         `http://localhost:3000/api/usuarios/usuario/${usuarioJSON.id}`
       );
@@ -35,6 +35,9 @@ function Login() {
         console.log(data);
         
         localStorage.setItem("userEmpresa", data.empresaId); 
+        localStorage.setItem("userApellido", data.apellido); 
+        localStorage.setItem("userNombre", data.nombre); 
+        localStorage.setItem("userRol", data.rolId);
 
       } else {
         throw new Error("Error fetching departamentos");

@@ -14,7 +14,7 @@ async function obtenerEmpresa(clave: string) {
 }
 
 async function obtenerRoles(id: string) {
-    const roles = await fetch(process.env.NEXT_PUBLIC_API_URL + 'roles/roles-empresa/' + id,
+    const roles = await fetch(process.env.NEXT_PUBLIC_API_URL + 'roles/',
         {
             cache: 'no-store'
         });

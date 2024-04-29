@@ -16,19 +16,23 @@ interface Amortizacion {
 }
 
 export interface Cuota {
-  numero_cuota:string;
+  numero_cuota: string;
   capital: string;
   cuota: string;
   cuota_total: string;
   fecha: string;
   interes: string;
-  saldo:string;
-  seguro:string;
+  saldo: string;
+  seguro: string;
 }
 
 const simuCreditoPage = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [amortizacionTipo, setAmortizacionTipo] = useState("");
+  const [monto, setMonto] = useState("");
+  const [tasaInteres, setTasaInteres] = useState("");
+  const [seguro, setSeguro] = useState("");
+  const [cuotaMensual, setCuotaMensual] = useState("");
   const [departamentos, setDepartamentos] = useState([]);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [password, setPassword] = useState("");
@@ -46,10 +50,7 @@ const simuCreditoPage = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  const currentItems = (cuotas || []).slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentItems = (cuotas || []).slice(indexOfFirstItem, indexOfLastItem);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [userData, setUserData] = useState({
     monto: "",
@@ -73,7 +74,6 @@ const simuCreditoPage = () => {
     setUserEmpresa(userEmpresadata);
     fetchRol(userEmpresadata);
     fetchAmortizacion();
-    fetchData();
   }, []);
 
   const fetchData = async () => {
@@ -144,6 +144,10 @@ const simuCreditoPage = () => {
       seguro: formData.seguro,
     };
 
+    setMonto(formData.monto);
+    setTasaInteres(formData.interes.toString());
+    setSeguro(formData.seguro);
+
     if (amortizacionTipo === "1") {
       try {
         const response = await fetch(
@@ -159,6 +163,10 @@ const simuCreditoPage = () => {
 
         if (response.ok) {
           const data = await response.json();
+
+          setCuotaMensual(data[1].cuota_total);
+          console.log(data[1].cuota_total);
+
           setCuotas(data);
           console.log(data);
         } else {
@@ -184,6 +192,7 @@ const simuCreditoPage = () => {
 
         if (response.ok) {
           const data = await response.json();
+          setCuotaMensual(data[1].cuota_total);
           setCuotas(data);
           console.log(data);
         } else {
@@ -213,6 +222,20 @@ const simuCreditoPage = () => {
   const handleRolChange = (event: any) => {
     const selectedRolId = parseInt(event.target.value, 10);
     setFormData({ ...formData, interes: selectedRolId });
+  };
+
+  const handleLimpiar = () => {
+    setFormData({
+      monto: "",
+      interes: 0,
+      tiempo: "",
+      fecha_inicio: "",
+      seguro: "",
+    });
+
+    setAmortizacionTipo("");
+
+
   };
 
   const handleAmortizacionChange = (event: any) => {
@@ -403,7 +426,7 @@ const simuCreditoPage = () => {
           </div>
           <button
             type="submit"
-            onClick={handleGuardar}
+            onClick={ handleLimpiar}
             className="mr-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Limpiar
@@ -426,25 +449,25 @@ const simuCreditoPage = () => {
               Saldo a financiar $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {monto}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Cuota mensual $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {cuotaMensual}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Tasa de Interes %
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              {tasaInteres} %
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Seguro $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {seguro}
             </h3>
           </div>
           <div data-popper-arrow></div>
