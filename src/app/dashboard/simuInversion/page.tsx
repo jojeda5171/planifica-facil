@@ -1,7 +1,10 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export interface Cuota {
   interes_bruto: string;
@@ -18,6 +21,7 @@ export interface Departamento {
 
 const simuInversionPage = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
+  const pdfRef = useRef<HTMLDivElement>(null);
   const [passwordActual, setPasswordActual] = useState("");
   const [tasaInteres, setTasaInteres] = useState("");
   const [userEmpresa, setUserEmpresa] = useState<string | null>(null);
@@ -173,6 +177,88 @@ const simuInversionPage = () => {
 
   };
 
+  /* const downloadPdf = () => {
+    if (formData===null) {
+      mostrarMensajeToast("Ingrese datos primero")
+      return;
+    }
+  
+      const input = pdfRef.current;
+      if (input) {
+        html2canvas(input).then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF("p", "mm", "a4", true);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+          const imgX = (pdfWidth - imgWidth * ratio) / 2;
+          const imgY = 5;
+          pdf.addImage(
+            imgData,
+            "PNG",
+            imgX,
+            imgY,
+            imgWidth * ratio,
+            imgHeight * ratio
+          );
+          pdf.save("reporteTotal.pdf");
+        });
+      } else {
+        console.error(
+          "El elemento referenciado por pdfRef.current es undefined."
+        );
+      }
+    }; */
+
+    const downloadPdf = () => {
+      // Verificar si todos los campos en formData están vacíos o no definidos
+      const formDataKeys = Object.keys(formData);
+      const formDataValues = Object.values(formData);
+    
+      if (formDataKeys.some((key, index) => {
+        const value = formDataValues[index];
+        // Verificar si el valor es null, una cadena vacía o una cadena con solo espacios en blanco (para strings)
+        return value === null ||
+               (typeof value === "string" && value.trim() === "");
+      })) {
+        // Al menos un campo está vacío o no definido, mostrar mensaje de advertencia
+        mostrarMensajeToast("Ingrese todos los datos antes de generar el PDF");
+        return;
+      }
+    
+      const input = pdfRef.current;
+      if (input) {
+        html2canvas(input).then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF("p", "mm", "a4", true);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+          const imgX = (pdfWidth - imgWidth * ratio) / 2;
+          const imgY = 5;
+          pdf.addImage(
+            imgData,
+            "PNG",
+            imgX,
+            imgY,
+            imgWidth * ratio,
+            imgHeight * ratio
+          );
+          pdf.save("reporteTotal.pdf");
+        });
+      } else {
+        console.error(
+          "El elemento referenciado por pdfRef.current es undefined."
+        );
+      }
+    };
+    
+    
+
   return (
     <>
       <div className="text-center font-bold my-4 mb-16 text-black">
@@ -249,12 +335,28 @@ const simuInversionPage = () => {
           >
             Calcular
           </button>
+          <div className="pt-6">
+            <button
+              type="button"
+              className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none font-medium rounded-xl text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600"
+              onClick={downloadPdf}
+            >
+              Descargar
+            </button>
+          </div>
         </form>
 
-        <div
+        <div ref={pdfRef}
           role="tooltip"
           className="ml-20 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 w-[500px] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
         >
+
+          <div >
+          <div className="text-center  my-4 mb-8">
+              <h3 className="mb-4 text-xs font-serif leading-none tracking-tight text-gray-200 md:text-4xl ">
+                  Información de Inversión 
+                </h3>
+              </div>
           <div className="grid grid-cols-2 p-5 ml-12 mt-10">
             
             <h3 className="font-semibold text-gray-900 dark:text-white mb-10">
@@ -291,6 +393,9 @@ const simuInversionPage = () => {
 
           </div>
           <div data-popper-arrow></div>
+          </div>
+
+        
         </div>
       </div>
 
