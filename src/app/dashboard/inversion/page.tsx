@@ -6,15 +6,9 @@ import { DeleteIcon } from "../credito/DeleteIcon";
 export interface Departamento {
   id: string;
   nombre: string;
-  ruc: string;
-  clave_acceso: string;
-  logo: string;
-  direccion: string;
-  telefono: string;
-  email: string;
-  web: string;
+  tasaInteres: string;
 }
-function DepartamentosPage() {
+function InversionPage() {
   const [departamentos, setDepartamentos] = useState([]);
   const itemsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,9 +16,9 @@ function DepartamentosPage() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const [showFormulario, setShowFormulario] = useState(false);
+  const [userEmpresa, setUserEmpresa] = useState<string | null>(null);
   const [selectedDepartamento, setSelectedDepartamento] =
     useState<Departamento | null>(null);
-  const [selectedFile, setSelectedFile] = useState(new File([], "default.txt"));
 
   const currentItems = (departamentos || []).slice(
     indexOfFirstItem,
@@ -33,17 +27,18 @@ function DepartamentosPage() {
   const [formData, setFormData] = useState({
     id: "0",
     nombre: "",
-    ruc: "",
-    clave_acceso: "",
-    logo: "default.txt",
-    direccion: "",
-    telefono: "",
-    email: "",
-    web: "",
+    tasaInteres: "",
   });
-  const fetchDepartamentos = async () => {
+  const fetchDepartamentos = async (userEmpresaData: any) => {
+    console.log(userEmpresaData);
+
     try {
-      const response = await fetch(`http://localhost:3000/api/empresas`);
+      const response = await fetch(
+        `http://localhost:3000/api/categoria-inversion/empresa/${userEmpresaData}`
+      );
+      /* const response = await fetch(
+        `http://localhost:3000/api/categoria-inversion/`
+      ); */
       if (response.ok) {
         const data = await response.json();
         setDepartamentos(data);
@@ -70,62 +65,49 @@ function DepartamentosPage() {
   };
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    console.log(formData);
     
-    const formDataEmpresa = new FormData(); // Crea un objeto FormData para enviar el archivo
-
-    // Agrega los campos de texto al FormData
-    formDataEmpresa.append("nombre", formData.nombre);
-    formDataEmpresa.append("ruc", formData.ruc);
-    //formDataEmpresa.append("clave_acceso", formData.clave_acceso);
-    formDataEmpresa.append("direccion", formData.direccion);
-    formDataEmpresa.append("telefono", formData.telefono);
-    formDataEmpresa.append("email", formData.email);
-    formDataEmpresa.append("web", formData.web);
-
-    if (!selectedFile) {
-      console.error("No se ha seleccionado ningún archivo.");
-      return;
+    if (departamentos !== null && departamentos.length > 0) {
+        mostrarMensajeToast("Solo puede haber una tasa por Empresa");
+    }else {
+        const data = {
+            nombre: formData.nombre,
+            tasaInteres: Number(formData.tasaInteres) 
+          };
+          
+          console.log(data);
+          try {
+            let url = `http://localhost:3000/api/categoria-inversion/${userEmpresa}`;
+            let method = "POST";
+            const response = await fetch(url, {
+              method: method,
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+      
+            if (!response.ok) {
+              throw new Error("Failed to register la peticion");
+            }
+            fetchDepartamentos(userEmpresa);
+            setFormData({
+              id: "0",
+              nombre: "",
+              tasaInteres: "",
+            });
+            mostrarMensajeToast("Tasa registrada con éxito!");
+            setSelectedDepartamento(null); // Limpiar selectedPeticion después de la operación
+            setShowFormulario(false);
+          } catch (error) {
+            console.error("Error al registrar el departamento:", error);
+            mostrarMensajeToast("Error al registrar la categoria!");
+          }
     }
-    console.log(selectedFile);
-    
-    // Agrega el archivo al FormData
-    formDataEmpresa.append("logo", selectedFile);
-    console.log(formDataEmpresa);
-    
-    try {
-      let url = "http://localhost:3000/api/empresas";
-      let method = "POST";
-      const response = await fetch(url, {
-        method: method,
-        body: formDataEmpresa,
-      });
 
-      if (!response.ok) {
-        throw new Error("Failed to register la peticion");
-      }
-      fetchDepartamentos();
-      setFormData({
-        id: "0",
-        nombre: "",
-        ruc: "",
-        clave_acceso: "",
-        logo: "default.txt",
-        direccion: "",
-        telefono: "",
-        email: "",
-        web: "",
-      });
-      mostrarMensajeToast("Empresa registrado con éxito!");
-      setSelectedDepartamento(null); // Limpiar selectedPeticion después de la operación
-      setShowFormulario(false);
-    } catch (error) {
-      console.error("Error al registrar el departamento:", error);
-      mostrarMensajeToast("Error al registrar el departamento!");
-    }
+    
   };
   const handleDelete = (id: any) => {
-    fetch(`http://localhost:3000/api/empresas//${id}`, {
+    fetch(`http://localhost:3000/api/categoria-inversion/${id}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -135,7 +117,7 @@ function DepartamentosPage() {
               (Departamento: Departamento) => Departamento.id !== id
             )
           );
-          mostrarMensajeToast("Empresa eliminada correctamente");
+          mostrarMensajeToast("Tasa eliminada correctamente");
         } else {
           throw new Error("Failed to delete");
         }
@@ -151,39 +133,31 @@ function DepartamentosPage() {
   };
   const handleUpdate = async (e: any, departamentoId: any) => {
     e.preventDefault();
+    console.log(selectedDepartamento);
 
-    const formDataEmpresa = new FormData(); // Crea un objeto FormData para enviar el archivo
+    const data = {
+      nombre: selectedDepartamento!.nombre,
+      tasaInteres: Number(selectedDepartamento!.tasaInteres) 
+    };
 
-    // Agrega los campos de texto al FormData
-    formDataEmpresa.append("nombre", selectedDepartamento!.nombre);
-    formDataEmpresa.append("ruc", selectedDepartamento!.ruc);
-    //formDataEmpresa.append("clave_acceso", formData.clave_acceso);
-    formDataEmpresa.append("direccion", selectedDepartamento!.direccion);
-    formDataEmpresa.append("telefono", selectedDepartamento!.telefono);
-    formDataEmpresa.append("email", selectedDepartamento!.email);
-    formDataEmpresa.append("web", selectedDepartamento!.web);
-
-    if (!selectedFile) {
-      console.error("No se ha seleccionado ningún archivo.");
-      return;
-    }
-    console.log(selectedFile);
+    console.log(data);
     
-    // Agrega el archivo al FormData
-    formDataEmpresa.append("logo", selectedFile);
-    console.log(formDataEmpresa);
+    
     try {
       const response = await fetch(
-        `http://localhost:3000/api/empresas/${departamentoId}`,
+        `http://localhost:3000/api/categoria-inversion/${departamentoId}`,
         {
           method: "PUT",
-          body: formDataEmpresa,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body:JSON.stringify(data),
         }
       );
-      fetchDepartamentos();
+      fetchDepartamentos(userEmpresa);
       // Cerrar el formulario después de la actualización exitosa
       setShowFormulario(false);
-      mostrarMensajeToast("Departamento actualizado con éxito!");
+      mostrarMensajeToast("Tasa actualizada con éxito!");
     } catch (error) {
       console.error("Error al actualizar el departamento:", error);
       mostrarMensajeToast("Error al actualizar");
@@ -215,23 +189,21 @@ function DepartamentosPage() {
     }
   };
 
-  const handleFileChange = (event: any) => {
-    const file = event.target.files[0]; // Obtiene el archivo seleccionado del evento
-
-    // Aquí puedes realizar acciones con el archivo seleccionado, como establecerlo en el estado
-    // Por ejemplo, podrías guardar el archivo en el estado si usas un hook de estado:
-    setSelectedFile(file);
-  };
+  
 
   useEffect(() => {
-    fetchDepartamentos();
+    const userEmpresadata = localStorage.getItem("userEmpresa");
+
+    setUserEmpresa(userEmpresadata);
+
+    fetchDepartamentos(userEmpresadata);
   }, []);
 
   return (
     <>
       <div className="text-center font-bold my-4 mb-8">
         <h2 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl ">
-          Gestión de Empresas
+          Crear Tasa Inversión
         </h2>
       </div>
       <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -242,49 +214,13 @@ function DepartamentosPage() {
                 scope="col"
                 className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
               >
-                Nombre de la empresa
+                Tipo de credito
               </th>
               <th
                 scope="col"
                 className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
               >
-                Ruc
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Dirección
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Teléfono
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Email
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Clave de acceso
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Logo
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-              >
-                Web
+                % tasa de interes
               </th>
               <th
                 scope="col"
@@ -303,13 +239,7 @@ function DepartamentosPage() {
                 <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                   {departamento.nombre}
                 </td>
-                <td className="px-6 py-4">{departamento.ruc}</td>
-                <td className="px-6 py-4">{departamento.direccion}</td>
-                <td className="px-6 py-4">{departamento.telefono}</td>
-                <td className="px-6 py-4">{departamento.email}</td>
-                <td className="px-6 py-4">{departamento.clave_acceso}</td>
-                <td className="px-6 py-4">{departamento.logo}</td>
-                <td className="px-6 py-4">{departamento.web}</td>
+                <td className="px-6 py-4">{departamento.tasaInteres}</td>
 
                 <td className="flex items-center px-6 py-4">
                   <a
@@ -382,9 +312,9 @@ function DepartamentosPage() {
       {/* MODAL ADD */}
       {showFormulario && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="flex justify-center items-center h-screen ">
+          <div className="flex justify-center items-center h-screen">
             <form
-              className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-[350px] "
+              className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-[350px]"
               onSubmit={handleSubmit} // Asegúrate de tener una función handleSubmit para manejar el envío del formulario
             >
               {/* Nombre del departamento */}
@@ -393,7 +323,7 @@ function DepartamentosPage() {
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="nombre"
                 >
-                  Nombre de la empresa:
+                  Nombre tipo de interes:
                 </label>
 
                 <input
@@ -402,7 +332,7 @@ function DepartamentosPage() {
                   type="text"
                   value={formData.nombre}
                   onChange={handleInputChange}
-                  placeholder="Ingrese el nombre de la empresa"
+                  placeholder="Ingrese el nombre del departamento"
                   required
                 />
               </div>
@@ -410,118 +340,23 @@ function DepartamentosPage() {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="ruc"
+                  htmlFor="tasaInteres"
                 >
-                  RUC:
+                  % tasa de interés:
                 </label>
                 <div className="relative">
                   <input
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="ruc"
+                    id="tasaInteres"
                     type="number"
-                    placeholder="Ingrese el ruc"
-                    value={formData.ruc}
+                    placeholder="Ingrese el % de interés"
+                    value={formData.tasaInteres}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
               </div>
-              {/* Hora de fin */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="direccion"
-                >
-                  Dirección:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="direccion"
-                    type="text"
-                    placeholder="Ingrese la dirección"
-                    value={formData.direccion}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de inicio Receso */}
-              <div className="mb-4 ">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="telefono"
-                >
-                  Teléfono:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="telefono"
-                    type="number"
-                    placeholder="Ingrese el teléfono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de fin de receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="email"
-                >
-                  Email:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    placeholder="Ingrese el email"
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="web"
-                >
-                  Web:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="web"
-                    type="text"
-                    value={formData.web}
-                    placeholder="Ingrese la dirección de la web"
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="logo"
-                >
-                  Logo:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="logo"
-                    type="file"
-                    onChange={handleFileChange}
-                    required
-                  />
-                </div>
-              </div>
+
               {/* Buttons */}
               <div className="flex items-center justify-between">
                 <button
@@ -554,7 +389,7 @@ function DepartamentosPage() {
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="nombre"
                 >
-                  Nombre de la empresa:
+                  Nombre tipo de interes:
                 </label>
 
                 <input
@@ -571,113 +406,22 @@ function DepartamentosPage() {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="ruc"
+                  htmlFor="tasaInteres"
                 >
-                  RUC:
+                  % tasa de interés:
                 </label>
                 <div className="relative">
                   <input
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="ruc"
+                    id="tasaInteres"
                     type="number"
-                    value={selectedDepartamento.ruc}
+                    value={selectedDepartamento.tasaInteres}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
               </div>
-              {/* Hora de fin */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="direccion"
-                >
-                  Dirección:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="direccion"
-                    type="text"
-                    value={selectedDepartamento.direccion}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de inicio Receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="telefono"
-                >
-                  Teléfono:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="telefono"
-                    type="number"
-                    value={selectedDepartamento.telefono}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              {/* Hora de fin de receso */}
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="email"
-                >
-                  Email:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="email"
-                    type="email"
-                    value={selectedDepartamento.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="web"
-                >
-                  WEB:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="web"
-                    type="text"
-                    value={selectedDepartamento.web}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="logo"
-                >
-                  Logo:
-                </label>
-                <div className="relative">
-                  <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="logo"
-                    type="file"
-                    onChange={handleFileChange}
-                    required
-                  />
-                </div>
-              </div>
+              
 
               <div className="flex items-center justify-between">
                 <button
@@ -747,4 +491,4 @@ function DepartamentosPage() {
   );
 }
 
-export default DepartamentosPage;
+export default InversionPage;

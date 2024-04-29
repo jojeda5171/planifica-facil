@@ -3,69 +3,77 @@
 
 import React, { useEffect, useState } from "react";
 
+interface Rol {
+  id: string;
+  nombre: string;
+  tasaInteres: string;
+  empresaId: string;
+}
+
+interface Amortizacion {
+  id: string;
+  nombre: string;
+}
+
+export interface Cuota {
+  numero_cuota: string;
+  capital: string;
+  cuota: string;
+  cuota_total: string;
+  fecha: string;
+  interes: string;
+  saldo: string;
+  seguro: string;
+}
+
 const simuCreditoPage = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [passwordActual, setPasswordActual] = useState("");
+  const [amortizacionTipo, setAmortizacionTipo] = useState("");
+  const [monto, setMonto] = useState("");
+  const [tasaInteres, setTasaInteres] = useState("");
+  const [seguro, setSeguro] = useState("");
+  const [cuotaMensual, setCuotaMensual] = useState("");
+  const [departamentos, setDepartamentos] = useState([]);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [password, setPassword] = useState("");
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [passwordConfirm, setPasswordConfirm] = useState("");
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [containsSymbol, setContainsSymbol] = useState(false);
+  const [rol, setRol] = useState<Rol[] | null>(null);
+  const [amortizacion, setAmortizacion] = useState<Amortizacion[] | null>(null);
+  const [userEmpresa, setUserEmpresa] = useState<string | null>(null);
+  const [cuotas, setCuotas] = useState([]);
+  const itemsPerPage = 1000;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil((cuotas?.length || 1) / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentItems = (cuotas || []).slice(indexOfFirstItem, indexOfLastItem);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [userData, setUserData] = useState({
-    id: "",
-    cedula_usu: "",
-    nombre_usu: "",
-    apellido_usu: "",
-    telefono_usu: "",
-    fecha_ingreso: "",
-    fecha_nacimiento: "",
-    correo: "",
-    clave: "",
-    rol: "",
-    id_depa_asig: "",
-    id_contra_asig: "",
-    estado: "",
+    monto: "",
+    interes: "",
+    tiempo: "",
+    fecha_inicio: "",
+    seguro: "",
   });
 
-  const handlePasswordChange = (e: any) => {
-    setPassword(e.target.value);
-  };
-
-  const handlePasswordActualChange = (e: any) => {
-    setPasswordActual(e.target.value);
-  };
-
-  const handlePasswordConfirmChange = (e: any) => {
-    setPasswordConfirm(e.target.value);
-  };
-
-  const getColorClass = (length: any) => {
-    if (length <= 3) {
-      return "bg-red-500";
-    } else if (length <= 7) {
-      return "bg-orange-300";
-    } else {
-      return "bg-green-500";
-    }
-  };
-  const tieneLetraMayuscula = (texto: any) => {
-    return /[A-Z]/.test(texto);
-  };
-
-  const tieneNumero = (texto: any) => {
-    return /\d/.test(texto);
-  };
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    setContainsSymbol(hasSymbol);
-  }, [password]);
+  const [formData, setFormData] = useState({
+    monto: "",
+    interes: 0,
+    tiempo: "",
+    fecha_inicio: "",
+    seguro: "",
+  });
 
   useEffect(() => {
-    fetchData();
+    const userEmpresadata = localStorage.getItem("userEmpresa");
+
+    setUserEmpresa(userEmpresadata);
+    fetchRol(userEmpresadata);
+    fetchAmortizacion();
   }, []);
 
   const fetchData = async () => {
@@ -84,78 +92,117 @@ const simuCreditoPage = () => {
     }
   };
 
+  const fetchRol = async (userEmpresaData: any) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/categoria-creditos/empresa/${userEmpresaData}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setRol(data);
+      } else {
+        throw new Error("Error fetching Departamentos");
+      }
+    } catch (error) {
+      console.error("Error fetching Departamentos:", error);
+    }
+  };
+  const fetchAmortizacion = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/tipo-calculo`);
+      if (response.ok) {
+        const data = await response.json();
+        setAmortizacion(data);
+      } else {
+        throw new Error("Error fetching Departamentos");
+      }
+    } catch (error) {
+      console.error("Error fetching Departamentos:", error);
+    }
+  };
+
+  const handleInputChange = (e: any) => {
+    const { id, value } = e.target;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [id]: value,
+    }));
+  };
+
   const handleGuardar = async (e: any) => {
     e.preventDefault();
 
-    if (passwordActual !== userData?.clave) {
-      mostrarMensajeToast("Verifique que su contraseña actual sea correcta");
-      return;
-    }
+    const fechanew = formatDate(formData.fecha_inicio);
+    console.log(fechanew);
 
-    if (password !== passwordConfirm) {
-      mostrarMensajeToast("Verifique que las contraseñas coincidan");
-      return;
-    }
+    const data = {
+      monto: formData.monto,
+      interes: formData.interes,
+      tiempo: formData.tiempo,
+      fecha_inicio: fechanew,
+      seguro: formData.seguro,
+    };
 
-    if (password.length < 8) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos 8 caracteres"
-      );
-      return;
-    }
+    setMonto(formData.monto);
+    setTasaInteres(formData.interes.toString());
+    setSeguro(formData.seguro);
 
-    const verificarMayuscula = tieneLetraMayuscula(password);
+    if (amortizacionTipo === "1") {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/amortizacion/frances`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
 
-    if (!verificarMayuscula) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos una mayuscula"
-      );
-      return;
-    }
-    const verificarNumero = tieneNumero(password);
+        if (response.ok) {
+          const data = await response.json();
 
-    if (!verificarNumero) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos un numero"
-      );
-      return;
-    }
+          setCuotaMensual(data[1].cuota_total);
+          console.log(data[1].cuota_total);
 
-    const verificarSimbolo = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    if (!verificarSimbolo) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos un símbolo especial"
-      );
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/usuarios/actualizar-clave/${userData?.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clave: password,
-          }),
+          setCuotas(data);
+          console.log(data);
+        } else {
+          console.error("Error al actualizar la contraseña");
+          mostrarMensajeToast("Error al actualizar la contraseña");
         }
-      );
-
-      if (response.ok) {
-        mostrarMensajeToast("Contraseña actualizada correctamente");
-        setPassword("");
-        setPasswordActual("");
-        setPasswordConfirm("");
-      } else {
-        console.error("Error al actualizar la contraseña");
+      } catch (error) {
+        console.error("Error en la solicitud:", error);
         mostrarMensajeToast("Error al actualizar la contraseña");
       }
-    } catch (error) {
-      console.error("Error en la solicitud:", error);
-      mostrarMensajeToast("Error al actualizar la contraseña");
+    } else if (amortizacionTipo === "2") {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/amortizacion/aleman`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setCuotaMensual(data[1].cuota_total);
+          setCuotas(data);
+          console.log(data);
+        } else {
+          console.error("Error al actualizar la contraseña");
+          mostrarMensajeToast("Error al actualizar la contraseña");
+        }
+      } catch (error) {
+        console.error("Error en la solicitud:", error);
+        mostrarMensajeToast("Error al actualizar la contraseña");
+      }
     }
   };
 
@@ -172,6 +219,45 @@ const simuCreditoPage = () => {
     }, 5000);
   };
 
+  const handleRolChange = (event: any) => {
+    const selectedRolId = parseInt(event.target.value, 10);
+    setFormData({ ...formData, interes: selectedRolId });
+  };
+
+  const handleLimpiar = () => {
+    setFormData({
+      monto: "",
+      interes: 0,
+      tiempo: "",
+      fecha_inicio: "",
+      seguro: "",
+    });
+
+    setAmortizacionTipo("");
+
+
+  };
+
+  const handleAmortizacionChange = (event: any) => {
+    const selectedRolId = event.target.value;
+    setAmortizacionTipo(selectedRolId);
+    console.log(selectedRolId);
+  };
+
+  const formatDate = (dateString: any) => {
+    const date = new Date(dateString);
+    const day = date.getDate() + 1;
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    // Agrega ceros delante si es necesario para que todos tengan dos dígitos
+    const formattedDay = String(day).padStart(2, "0");
+    const formattedMonth = String(month).padStart(2, "0");
+
+    // Formatea la fecha como "dd/mm/yyyy"
+    return `${formattedDay}/${formattedMonth}/${year}`;
+  };
+
   return (
     <>
       <div className="text-center font-bold my-4 mb-16 text-black">
@@ -180,135 +266,167 @@ const simuCreditoPage = () => {
         </h2>
       </div>
 
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-2 mb-16">
         <form className="ml-28 mr-10">
           <div className="mb-4">
-                <label
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
-                  htmlFor="tipo_peticion"
+            <label
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
+              htmlFor="tipo_peticion"
+            >
+              Tipo de credito
+            </label>
+            <div className="relative">
+              <select
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="tipo_peticion"
+                value={formData.interes}
+                onChange={handleRolChange}
+                required
+              >
+                <option value="">Selecciona un tipo</option>
+                {rol &&
+                  rol.map((role) => (
+                    <option key={role.id} value={role.tasaInteres}>
+                      {role.nombre}
+                    </option>
+                  ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
                 >
-                  Tipo de credito
-                </label>
-                <div className="relative">
-                  <select
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="tipo_peticion"
-                    /* value={formData.id_tipo_pet_asig}
-                    onChange={handleTipoPeticionChange} */
-                    required
-                  >
-                    <option value="">Selecciona un tipo</option>
-                    {/* {tiposPeticion.map((tipo) => (
-                      <option key={tipo.value} value={tipo.value}>
-                        {tipo.label}
-                      </option>
-                    ))} */}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
-                      />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 6h.008v.008H6V6Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 6h.008v.008H6V6Z"
+                  />
+                </svg>
               </div>
+            </div>
+          </div>
           <div className="mb-6">
             <label
-              htmlFor="passwordNew"
+              htmlFor="monto"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
             >
               Monto solicitado $
             </label>
             <input
               type="number"
-              id="passwordNew"
-              value={password}
-              onChange={handlePasswordChange}
+              id="monto"
+              value={formData.monto}
+              onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
-              
             />
           </div>
           <div className="mb-6">
             <label
-              htmlFor="passwordConfirm"
+              htmlFor="tiempo"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
             >
               Plazo en meses
             </label>
             <input
               type="number"
-              id="passwordConfirm"
-              value={passwordConfirm}
-              onChange={handlePasswordConfirmChange}
+              id="tiempo"
+              value={formData.tiempo}
+              onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              htmlFor="fecha_inicio"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
+            >
+              Fecha Inicio
+            </label>
+            <input
+              type="date"
+              id="fecha_inicio"
+              value={formData.fecha_inicio}
+              onChange={handleInputChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              htmlFor="seguro"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
+            >
+              Seguro
+            </label>
+            <input
+              type="number"
+              id="seguro"
+              value={formData.seguro}
+              onChange={handleInputChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
           </div>
           <div className="mb-4">
-                <label
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
-                  htmlFor="tipo_peticion"
+            <label
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
+              htmlFor="tipo_peticion"
+            >
+              Tipo de Amortización
+            </label>
+            <div className="relative">
+              <select
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="tipo_peticion"
+                value={amortizacionTipo}
+                onChange={handleAmortizacionChange}
+                required
+              >
+                <option value="">Selecciona un tipo</option>
+                {amortizacion &&
+                  amortizacion.map((amortiza) => (
+                    <option key={amortiza.id} value={amortiza.id}>
+                      {amortiza.nombre}
+                    </option>
+                  ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
                 >
-                  Tipo de Amortización
-                </label>
-                <div className="relative">
-                  <select
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="tipo_peticion"
-                    /* value={formData.id_tipo_pet_asig}
-                    onChange={handleTipoPeticionChange} */
-                    required
-                  >
-                    <option value="">Selecciona un tipo</option>
-                    {/* {tiposPeticion.map((tipo) => (
-                      <option key={tipo.value} value={tipo.value}>
-                        {tipo.label}
-                      </option>
-                    ))} */}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
-                      />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 6h.008v.008H6V6Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 6h.008v.008H6V6Z"
+                  />
+                </svg>
               </div>
+            </div>
+          </div>
           <button
             type="submit"
-            onClick={handleGuardar}
+            onClick={ handleLimpiar}
             className="mr-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Limpiar
@@ -327,35 +445,102 @@ const simuCreditoPage = () => {
           className="ml-20 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 w-[500px] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
         >
           <div className="grid grid-cols-2 p-5 ml-12 mt-16">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-10">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-10">
               Saldo a financiar $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {monto}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Cuota mensual $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {cuotaMensual}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Tasa de Interes %
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              {tasaInteres} %
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Seguro $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {seguro}
             </h3>
-
-
           </div>
           <div data-popper-arrow></div>
         </div>
+      </div>
+
+      <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                N°
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Cuota
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Cuota total
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Seguro
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Fecha
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Interes
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Saldo
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.map((cuota: Cuota) => (
+              <tr
+                key={cuota.numero_cuota}
+                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  {cuota.numero_cuota}
+                </td>
+                <td className="px-6 py-4">{cuota.cuota}</td>
+                <td className="px-6 py-4">{cuota.cuota_total}</td>
+                <td className="px-6 py-4">{cuota.seguro}</td>
+                <td className="px-6 py-4">{cuota.fecha}</td>
+                <td className="px-6 py-4">{cuota.interes}</td>
+                <td className="px-6 py-4">{cuota.saldo}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {mostrarToast && (

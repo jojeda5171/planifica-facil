@@ -3,15 +3,32 @@
 
 import React, { useEffect, useState } from "react";
 
+export interface Cuota {
+  interes_bruto: string;
+  interes_mensual: string;
+  total: string;
+  fecha: string;
+}
+
+export interface Departamento {
+  id: string;
+  nombre: string;
+  tasaInteres: string;
+}
+
 const simuInversionPage = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [passwordActual, setPasswordActual] = useState("");
+  const [tasaInteres, setTasaInteres] = useState("");
+  const [userEmpresa, setUserEmpresa] = useState<string | null>(null);
+  const [departamentos, setDepartamentos] = useState([] as Departamento[]);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [password, setPassword] = useState("");
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [passwordConfirm, setPasswordConfirm] = useState("");
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [containsSymbol, setContainsSymbol] = useState(false);
+  const [cuotas, setCuotas] = useState<Cuota | null>(null);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [userData, setUserData] = useState({
     id: "",
@@ -29,53 +46,27 @@ const simuInversionPage = () => {
     estado: "",
   });
 
-  const handlePasswordChange = (e: any) => {
-    setPassword(e.target.value);
-  };
-
-  const handlePasswordActualChange = (e: any) => {
-    setPasswordActual(e.target.value);
-  };
-
-  const handlePasswordConfirmChange = (e: any) => {
-    setPasswordConfirm(e.target.value);
-  };
-
-  const getColorClass = (length: any) => {
-    if (length <= 3) {
-      return "bg-red-500";
-    } else if (length <= 7) {
-      return "bg-orange-300";
-    } else {
-      return "bg-green-500";
-    }
-  };
-  const tieneLetraMayuscula = (texto: any) => {
-    return /[A-Z]/.test(texto);
-  };
-
-  const tieneNumero = (texto: any) => {
-    return /\d/.test(texto);
-  };
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [formData, setFormData] = useState({
+    monto: "",
+    interes: 0,
+    tiempo: "",
+    fecha_inicio: "",
+  });
   useEffect(() => {
-    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    setContainsSymbol(hasSymbol);
-  }, [password]);
+  const userEmpresadata = localStorage.getItem("userEmpresa");
 
-  useEffect(() => {
-    fetchData();
+    setUserEmpresa(userEmpresadata);
+    fetchData(userEmpresadata);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (userEmpresadata: any) => {
     try {
       const id = localStorage.getItem("id_user");
-      const response = await fetch(`http://localhost:5000/usuario/${id}`);
+      const response = await fetch(`http://localhost:3000/api/categoria-inversion/empresa/${userEmpresadata}`);
       if (response.ok) {
         const data = await response.json();
 
-        setUserData(data);
+        setDepartamentos(data);
       } else {
         console.error("Error al obtener datos del usuario");
       }
@@ -87,68 +78,40 @@ const simuInversionPage = () => {
   const handleGuardar = async (e: any) => {
     e.preventDefault();
 
-    if (passwordActual !== userData?.clave) {
-      mostrarMensajeToast("Verifique que su contraseña actual sea correcta");
-      return;
-    }
+    const fechanew = formatDate(formData.fecha_inicio);
+    console.log(fechanew);
 
-    if (password !== passwordConfirm) {
-      mostrarMensajeToast("Verifique que las contraseñas coincidan");
-      return;
-    }
+    //setTasaInteres("9");
+    console.log(departamentos);
+    
 
-    if (password.length < 8) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos 8 caracteres"
-      );
-      return;
-    }
+    const data = {
+      monto: formData.monto,
+      interes: departamentos[0].tasaInteres,
+      tiempo: formData.tiempo,
+      fecha_inicio: fechanew,
+    };
 
-    const verificarMayuscula = tieneLetraMayuscula(password);
-
-    if (!verificarMayuscula) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos una mayuscula"
-      );
-      return;
-    }
-    const verificarNumero = tieneNumero(password);
-
-    if (!verificarNumero) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos un numero"
-      );
-      return;
-    }
-
-    const verificarSimbolo = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    if (!verificarSimbolo) {
-      mostrarMensajeToast(
-        "Verifique que su contraseña tenga al menos un símbolo especial"
-      );
-      return;
-    }
+    console.log(data);
 
     try {
       const response = await fetch(
-        `http://localhost:5000/usuarios/actualizar-clave/${userData?.id}`,
+        `http://localhost:3000/api/inversion`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            clave: password,
-          }),
+          body: JSON.stringify(data),
         }
       );
 
       if (response.ok) {
-        mostrarMensajeToast("Contraseña actualizada correctamente");
-        setPassword("");
-        setPasswordActual("");
-        setPasswordConfirm("");
+        const data1 = await response.json();
+        setCuotas(data1);
+        console.log(data1);
+        
+
       } else {
         console.error("Error al actualizar la contraseña");
         mostrarMensajeToast("Error al actualizar la contraseña");
@@ -172,6 +135,44 @@ const simuInversionPage = () => {
     }, 5000);
   };
 
+  const handleInputChange = (e: any) => {
+    const { id, value } = e.target;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [id]: value,
+    }));
+  };
+
+  const formatDate = (dateString: any) => {
+    const date = new Date(dateString);
+    const day = date.getDate() + 1;
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    // Agrega ceros delante si es necesario para que todos tengan dos dígitos
+    const formattedDay = String(day).padStart(2, "0");
+    const formattedMonth = String(month).padStart(2, "0");
+
+    // Formatea la fecha como "dd/mm/yyyy"
+    return `${formattedDay}/${formattedMonth}/${year}`;
+  };
+
+  const handleLimpiar = () => {
+    setFormData({
+      monto: "",
+      interes: 0,
+      tiempo: "",
+      fecha_inicio: "",
+    });
+
+    setTasaInteres("");
+
+    setCuotas(null);
+
+
+  };
+
   return (
     <>
       <div className="text-center font-bold my-4 mb-16 text-black">
@@ -184,16 +185,16 @@ const simuInversionPage = () => {
         <form className="ml-28 mr-10">
         <div className="mb-6">
             <label
-              htmlFor="passwordNew"
+              htmlFor="monto"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
             >
               Monto solicitado $
             </label>
             <input
               type="number"
-              id="passwordNew"
-              value={password}
-              onChange={handlePasswordChange}
+              id="monto"
+              value={formData.monto}
+              onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
               
@@ -201,16 +202,16 @@ const simuInversionPage = () => {
           </div>
           <div className="mb-6">
             <label
-              htmlFor="passwordNew"
+              htmlFor="tiempo"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
             >
               Plazo en meses
             </label>
             <input
               type="number"
-              id="passwordNew"
-              value={password}
-              onChange={handlePasswordChange}
+              id="tiempo"
+              value={formData.tiempo}
+              onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
               
@@ -218,69 +219,25 @@ const simuInversionPage = () => {
           </div>
           <div className="mb-6">
             <label
-              htmlFor="passwordConfirm"
+              htmlFor="fecha_inicio"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
             >
               Fecha de inicio
             </label>
             <input
               type="date"
-              id="passwordConfirm"
-              value={passwordConfirm}
-              onChange={handlePasswordConfirmChange}
+              id="fecha_inicio"
+              value={formData.fecha_inicio}
+              onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               
               required
             />
           </div>
-          <div className="mb-4">
-                <label
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
-                  htmlFor="tipo_peticion"
-                >
-                  Tipo de persona
-                </label>
-                <div className="relative">
-                  <select
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="tipo_peticion"
-                    /* value={formData.id_tipo_pet_asig}
-                    onChange={handleTipoPeticionChange} */
-                    required
-                  >
-                    <option value="">Selecciona un tipo</option>
-                    {/* {tiposPeticion.map((tipo) => (
-                      <option key={tipo.value} value={tipo.value}>
-                        {tipo.label}
-                      </option>
-                    ))} */}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
-                      />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 6h.008v.008H6V6Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+          
           <button
             type="submit"
-            onClick={handleGuardar}
+            onClick={handleLimpiar}
             className="mr-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Limpiar
@@ -304,31 +261,31 @@ const simuInversionPage = () => {
               Tasa de Interes %
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              % {departamentos[0]?.tasaInteres}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Interes bruto $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {cuotas?.interes_bruto}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              Impuesto %
+              Interes mensual $
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {cuotas?.interes_mensual}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              Interes real $
+            Fecha de vencimiento 
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              {cuotas?.fecha}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              Fecha de vencimiento 
+             Total $ 
             </h3>
             <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              0.0 $
+              $ {cuotas?.total}
             </h3>
 
 
