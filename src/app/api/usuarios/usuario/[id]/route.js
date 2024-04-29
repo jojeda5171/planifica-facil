@@ -10,6 +10,14 @@ export async function GET(request, { params }) {
   if (!empresaFind) {
     let empresaID = 0;
   }
+  const rolFind = await prisma.empresaRolUsuario.findFirst({
+    where: {
+      usuarioId: parseInt(params.id),
+    },
+  });
+  if (!rolFind) {
+    let rolID = 0;
+  }
   const usuario = await prisma.usuario.findUnique({
     where: {
       id: parseInt(params.id),
@@ -21,7 +29,7 @@ export async function GET(request, { params }) {
       { status: 404 }
     );
   }
-  const user = { ...usuario, empresaId: empresaFind.empresaId };
+  const user = { ...usuario, empresaId: empresaFind.empresaId, rolId: rolFind.rolId };
   return NextResponse.json(user);
 }
 
