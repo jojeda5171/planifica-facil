@@ -57,7 +57,7 @@ const simuInversionPage = () => {
     fecha_inicio: "",
   });
   useEffect(() => {
-  const userEmpresadata = localStorage.getItem("userEmpresa");
+    const userEmpresadata = localStorage.getItem("userEmpresa");
 
     setUserEmpresa(userEmpresadata);
     fetchData(userEmpresadata);
@@ -87,7 +87,7 @@ const simuInversionPage = () => {
 
     //setTasaInteres("9");
     console.log(departamentos);
-    
+
 
     const data = {
       monto: formData.monto,
@@ -114,7 +114,7 @@ const simuInversionPage = () => {
         const data1 = await response.json();
         setCuotas(data1);
         console.log(data1);
-        
+
 
       } else {
         console.error("Error al actualizar la contraseña");
@@ -212,64 +212,64 @@ const simuInversionPage = () => {
       }
     }; */
 
-    const downloadPdf = () => {
-      // Verificar si todos los campos en formData están vacíos o no definidos
-      const formDataKeys = Object.keys(formData);
-      const formDataValues = Object.values(formData);
-    
-      if (formDataKeys.some((key, index) => {
-        const value = formDataValues[index];
-        // Verificar si el valor es null, una cadena vacía o una cadena con solo espacios en blanco (para strings)
-        return value === null ||
-               (typeof value === "string" && value.trim() === "");
-      })) {
-        // Al menos un campo está vacío o no definido, mostrar mensaje de advertencia
-        mostrarMensajeToast("Ingrese todos los datos antes de generar el PDF");
-        return;
-      }
-    
-      const input = pdfRef.current;
-      if (input) {
-        html2canvas(input).then((canvas) => {
-          const imgData = canvas.toDataURL("image/png");
-          const pdf = new jsPDF("p", "mm", "a4", true);
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          const imgWidth = canvas.width;
-          const imgHeight = canvas.height;
-          const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-          const imgX = (pdfWidth - imgWidth * ratio) / 2;
-          const imgY = 5;
-          pdf.addImage(
-            imgData,
-            "PNG",
-            imgX,
-            imgY,
-            imgWidth * ratio,
-            imgHeight * ratio
-          );
-          pdf.save("reporteTotal.pdf");
-        });
-      } else {
-        console.error(
-          "El elemento referenciado por pdfRef.current es undefined."
+  const downloadPdf = () => {
+    // Verificar si todos los campos en formData están vacíos o no definidos
+    const formDataKeys = Object.keys(formData);
+    const formDataValues = Object.values(formData);
+
+    if (formDataKeys.some((key, index) => {
+      const value = formDataValues[index];
+      // Verificar si el valor es null, una cadena vacía o una cadena con solo espacios en blanco (para strings)
+      return value === null ||
+        (typeof value === "string" && value.trim() === "");
+    })) {
+      // Al menos un campo está vacío o no definido, mostrar mensaje de advertencia
+      mostrarMensajeToast("Ingrese todos los datos antes de generar el PDF");
+      return;
+    }
+
+    const input = pdfRef.current;
+    if (input) {
+      html2canvas(input).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4", true);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = 5;
+        pdf.addImage(
+          imgData,
+          "PNG",
+          imgX,
+          imgY,
+          imgWidth * ratio,
+          imgHeight * ratio
         );
-      }
-    };
-    
-    
+        pdf.save("reporteTotal.pdf");
+      });
+    } else {
+      console.error(
+        "El elemento referenciado por pdfRef.current es undefined."
+      );
+    }
+  };
+
+
 
   return (
-    <>
-      <div className="text-center font-bold my-4 mb-16 text-black">
-        <h2 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-black">
+    <div className="w-full flex flex-col">
+      <div className="mb-10 text-center font-bold m-auto text-black">
+        <h2 className="m-auto text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-black">
           Simulador de inversión
         </h2>
       </div>
 
-      <div className="grid grid-cols-2">
-        <form className="ml-28 mr-10">
-        <div className="mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-5">
+        <form className="p-4 bg-gray-100 rounded-lg">
+          <div className="mb-6">
             <label
               htmlFor="monto"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
@@ -283,7 +283,7 @@ const simuInversionPage = () => {
               onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
-              
+
             />
           </div>
           <div className="mb-6">
@@ -300,7 +300,7 @@ const simuInversionPage = () => {
               onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
-              
+
             />
           </div>
           <div className="mb-6">
@@ -316,29 +316,29 @@ const simuInversionPage = () => {
               value={formData.fecha_inicio}
               onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              
+
               required
             />
           </div>
-          
+
           <button
             type="submit"
             onClick={handleLimpiar}
-            className="mr-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="m-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Limpiar
           </button>
           <button
             type="submit"
             onClick={handleGuardar}
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="m-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Calcular
           </button>
-          <div className="pt-6">
+          <div className="p-1">
             <button
               type="button"
-              className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none font-medium rounded-xl text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600"
+              className="m-auto text-white bg-orange-500 hover:bg-orange-600 focus:outline-none font-medium rounded-xl text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600"
               onClick={downloadPdf}
             >
               Descargar
@@ -348,54 +348,54 @@ const simuInversionPage = () => {
 
         <div ref={pdfRef}
           role="tooltip"
-          className="ml-20 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 w-[500px] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
+          className="flex justify-center p-3 items-center text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
         >
 
-          <div >
-          <div className="text-center  my-4 mb-8">
-              <h3 className="mb-4 text-xs font-serif leading-none tracking-tight text-gray-200 md:text-4xl ">
-                  Información de Inversión 
-                </h3>
-              </div>
-          <div className="grid grid-cols-2 p-5 ml-12 mt-10">
-            
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-10">
-              Tasa de Interes %
-            </h3>
-            <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              % {departamentos[0]?.tasaInteres}
-            </h3>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Interes bruto $
-            </h3>
-            <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              $ {cuotas?.interes_bruto}
-            </h3>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Interes mensual $
-            </h3>
-            <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              $ {cuotas?.interes_mensual}
-            </h3>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-            Fecha de vencimiento 
-            </h3>
-            <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              {cuotas?.fecha}
-            </h3>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-             Total $ 
-            </h3>
-            <h3 className="font-light text-gray-900 dark:text-white mb-10">
-              $ {cuotas?.total}
-            </h3>
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-center  mb-4">
+              <h3 className="text-3xl font-serif leading-none tracking-tight text-gray-200 md:text-3xl lg:text-sm">
+                Información de Inversión
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-8 justify-center items-center p-3">
+
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Tasa de Interes %
+              </h3>
+              <h3 className="font-light text-gray-900 dark:text-white">
+                % {departamentos[0]?.tasaInteres}
+              </h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Interes bruto $
+              </h3>
+              <h3 className="font-light text-gray-900 dark:text-white">
+                $ {cuotas?.interes_bruto}
+              </h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Interes mensual $
+              </h3>
+              <h3 className="font-light text-gray-900 dark:text-white">
+                $ {cuotas?.interes_mensual}
+              </h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Fecha de vencimiento
+              </h3>
+              <h3 className="font-light text-gray-900 dark:text-white">
+                {cuotas?.fecha}
+              </h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Total $
+              </h3>
+              <h3 className="font-light text-gray-900 dark:text-white">
+                $ {cuotas?.total}
+              </h3>
 
 
+            </div>
+            <div data-popper-arrow></div>
           </div>
-          <div data-popper-arrow></div>
-          </div>
 
-        
+
         </div>
       </div>
 
@@ -444,7 +444,7 @@ const simuInversionPage = () => {
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
