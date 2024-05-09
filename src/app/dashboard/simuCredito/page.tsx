@@ -272,7 +272,7 @@ const simuCreditoPage = () => {
       mostrarMensajeToast("Ingrese todos los datos antes de generar el PDF");
       return;
     }
-
+  
     const input = pdfRef.current;
     if (input) {
       html2canvas(input).then((canvas) => {
@@ -301,7 +301,7 @@ const simuCreditoPage = () => {
       );
     }
   };
-
+  
 
   const handleRolChange = (event: any) => {
     const selectedRolId = parseInt(event.target.value, 10);
@@ -343,15 +343,15 @@ const simuCreditoPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <div className="mb-10 text-center font-bold m-auto text-black">
-        <h2 className="m-auto text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-black">
+    <>
+      <div className="text-center font-bold my-4 mb-16 text-black">
+        <h2 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-black">
           Simulador de credito
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-5">
-        <form className="p-4 bg-gray-100 rounded-lg">
+      <div className="grid grid-cols-2 mb-16">
+        <form className="ml-28 mr-10">
           <div className="mb-4">
             <label
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-black"
@@ -510,22 +510,22 @@ const simuCreditoPage = () => {
           </div>
           <button
             type="submit"
-            onClick={handleLimpiar}
-            className="m-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={ handleLimpiar}
+            className="mr-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Limpiar
           </button>
           <button
             type="submit"
             onClick={handleGuardar}
-            className="m-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             Calcular
           </button>
-          <div className="p-1">
+          <div className="pt-6">
             <button
               type="button"
-              className="m-auto text-white bg-orange-500 hover:bg-orange-600 focus:outline-none font-medium rounded-xl text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600"
+              className="text-white bg-orange-500 hover:bg-orange-600 focus:outline-none font-medium rounded-xl text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600"
               onClick={downloadPdf}
             >
               Descargar
@@ -535,124 +535,117 @@ const simuCreditoPage = () => {
 
         <div
           role="tooltip"
-          className="flex justify-center items-center text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
+          className="ml-20 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 w-[500px] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
         >
-          <div className="grid grid-cols-2 gap-x-5 gap-y-10 justify-center items-center p-3">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+          <div className="grid grid-cols-2 p-5 ml-12 mt-16">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-10">
               Saldo a financiar $
             </h3>
-            <h3 className="font-light text-gray-900 dark:text-white">
+            <h3 className="font-light text-gray-900 dark:text-white mb-10">
               $ {monto}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Cuota mensual $
             </h3>
-            <h3 className="font-light text-gray-900 dark:text-white">
+            <h3 className="font-light text-gray-900 dark:text-white mb-10">
               $ {cuotaMensual}
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Tasa de Interes %
             </h3>
-            <h3 className="font-light text-gray-900 dark:text-white">
+            <h3 className="font-light text-gray-900 dark:text-white mb-10">
               {tasaInteres} %
             </h3>
             <h3 className="font-semibold text-gray-900 dark:text-white">
               Seguro $
             </h3>
-            <h3 className="font-light text-gray-900 dark:text-white">
+            <h3 className="font-light text-gray-900 dark:text-white mb-10">
               $ {seguro}
             </h3>
           </div>
           <div data-popper-arrow></div>
         </div>
       </div>
-
+                
 
       <div ref={pdfRef} className="mb-10">
 
-        <div className="text-center font-bold my-10">
-          <h3 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl ">
-            Tabla de Amortización
-          </h3>
-        </div>
-
-        <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  N°
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Cuota
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Cuota total
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Seguro
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Fecha
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Interes
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Capital
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Saldo
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((cuota: Cuota) => (
-                <tr
-                  key={cuota.numero_cuota}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {cuota.numero_cuota}
-                  </td>
-                  <td className="px-6 py-4">{cuota.cuota}</td>
-                  <td className="px-6 py-4">{cuota.cuota_total}</td>
-                  <td className="px-6 py-4">{cuota.seguro}</td>
-                  <td className="px-6 py-4">{cuota.fecha}</td>
-                  <td className="px-6 py-4">{cuota.interes}</td>
-                  <td className="px-6 py-4">{cuota.capital}</td>
-                  <td className="px-6 py-4">{cuota.saldo}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="text-center font-bold my-4 mb-8">
+      <h3 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl ">
+          Tabla de Amortización 
+        </h3>
       </div>
-
+      
+      <div className="ml-4 mr-4 relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                N°
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Cuota
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Cuota total
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Seguro
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Fecha
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Interes
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                Saldo
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.map((cuota: Cuota) => (
+              <tr
+                key={cuota.numero_cuota}
+                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  {cuota.numero_cuota}
+                </td>
+                <td className="px-6 py-4">{cuota.cuota}</td>
+                <td className="px-6 py-4">{cuota.cuota_total}</td>
+                <td className="px-6 py-4">{cuota.seguro}</td>
+                <td className="px-6 py-4">{cuota.fecha}</td>
+                <td className="px-6 py-4">{cuota.interes}</td>
+                <td className="px-6 py-4">{cuota.saldo}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      </div>
+      
 
       {mostrarToast && (
         <div
@@ -699,7 +692,7 @@ const simuCreditoPage = () => {
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
