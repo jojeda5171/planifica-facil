@@ -84,7 +84,8 @@ The API includes the following endpoints:
      "interes": 5,
      "fecha_inicio": "01/01/2024"
    }
-   Response:
+   ```
+   - Response:
    ```bash
    {
      "interes_bruto": "500.00",
